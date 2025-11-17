@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Gastos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Gestión de Gastos</h1>
+
+  <!-- Formulario -->
+  <form id="formGasto" enctype="multipart/form-data">
+    <input type="text" name="servicio" placeholder="Servicio" required>
+    <input type="text" name="creador" placeholder="Creador" required>
+    <input type="date" name="fecha" required>
+    <input type="text" name="detalle" placeholder="Detalle">
+    <input type="number" name="monto" placeholder="Monto" required>
+    <select name="estado">
+      <option value="COMPLETADO">Completado</option>
+      <option value="PENDIENTE">Pendiente</option>
+    </select>
+    <input type="file" name="archivo" accept=".pdf,.jpg,.png">
+    <button type="submit">Agregar</button>
+  </form>
+
+  <!-- Tabla -->
+  <table id="tablaGastos">
+    <thead>
+      <tr>
+        <th>Servicio</th>
+        <th>Creador</th>
+        <th>Fecha</th>
+        <th>Detalle</th>
+        <th>Estado</th>
+        <th>Monto</th>
+        <th>Archivo</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="app.js"></script>
+</body>
+</html>

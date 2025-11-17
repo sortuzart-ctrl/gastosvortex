@@ -1,44 +1,299 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Gestión de Gastos</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8">
+    <title>Sistema de Gestión de Servicios</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <h1>Gestión de Gastos</h1>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>📊 Sistema Servicios</h2>
+            </div>
+            <nav class="menu">
+                <a href="#" class="menu-item active" data-view="dashboard">
+                    <span>📈</span> Dashboard
+                </a>
+                <a href="#" class="menu-item" data-view="servicios">
+                    <span>📋</span> Servicios
+                </a>
+                <a href="#" class="menu-item" data-view="graficos">
+                    <span>📊</span> Gráficos
+                </a>
+                <a href="#" class="menu-item" data-view="reportes">
+                    <span>📄</span> Reportes
+                </a>
+                <a href="#" class="menu-item" data-view="administracion">
+                    <span>⚙️</span> Administración
+                </a>
+            </nav>
+        </aside>
 
-  <!-- Formulario -->
-  <form id="formGasto" enctype="multipart/form-data">
-    <input type="text" name="servicio" placeholder="Servicio" required>
-    <input type="text" name="creador" placeholder="Creador" required>
-    <input type="date" name="fecha" required>
-    <input type="text" name="detalle" placeholder="Detalle">
-    <input type="number" name="monto" placeholder="Monto" required>
-    <select name="estado">
-      <option value="COMPLETADO">Completado</option>
-      <option value="PENDIENTE">Pendiente</option>
-    </select>
-    <input type="file" name="archivo" accept=".pdf,.jpg,.png">
-    <button type="submit">Agregar</button>
-  </form>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h1 id="view-title">Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="btnNuevoServicio">
+                        ➕ Nuevo Servicio
+                    </button>
+                    <button class="btn btn-secondary" id="btnExportarExcel">
+                        📥 Exportar Excel
+                    </button>
+                </div>
+            </header>
 
-  <!-- Tabla -->
-  <table id="tablaGastos">
-    <thead>
-      <tr>
-        <th>Servicio</th>
-        <th>Creador</th>
-        <th>Fecha</th>
-        <th>Detalle</th>
-        <th>Estado</th>
-        <th>Monto</th>
-        <th>Archivo</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+            <!-- Dashboard View -->
+            <section id="dashboard-view" class="view active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3 id="totalMonto">$0</h3>
+                            <p>Monto Total</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h3 id="totalCompletados">0</h3>
+                            <p>Completados</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <h3 id="totalServicios">0</h3>
+                            <p>Total Servicios</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏢</div>
+                        <div class="stat-info">
+                            <h3 id="totalFaenas">0</h3>
+                            <p>Faenas Activas</p>
+                        </div>
+                    </div>
+                </div>
 
-  <script src="app.js"></script>
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <h3>Servicios por Faena</h3>
+                        <canvas id="chartFaenas"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Montos por Estado</h3>
+                        <canvas id="chartEstados"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Servicios View -->
+            <section id="servicios-view" class="view">
+                <div class="filters-bar">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar por servicio, creador, detalle...">
+                    
+                    <select id="filterEstado">
+                        <option value="">Todos los Estados</option>
+                        <option value="COMPLETADO">Completado</option>
+                    </select>
+
+                    <select id="filterFaena">
+                        <option value="">Todas las Faenas</option>
+                    </select>
+
+                    <select id="filterCreador">
+                        <option value="">Todos los Creadores</option>
+                    </select>
+
+                    <input type="date" id="filterFechaDesde" placeholder="Fecha desde">
+                    <input type="date" id="filterFechaHasta" placeholder="Fecha hasta">
+
+                    <button class="btn btn-secondary" id="btnLimpiarFiltros">🔄 Limpiar</button>
+                </div>
+
+                <div class="table-container">
+                    <table id="tablaServicios">
+                        <thead>
+                            <tr>
+                                <th>Servicio</th>
+                                <th>Creador</th>
+                                <th>Fecha</th>
+                                <th>Detalle</th>
+                                <th>Estado</th>
+                                <th>Factura</th>
+                                <th>Monto</th>
+                                <th>Archivo</th>
+                                <th>Observaciones</th>
+                                <th>Faena</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaBody">
+                            <!-- Datos cargados dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Gráficos View -->
+            <section id="graficos-view" class="view">
+                <div class="graficos-controls">
+                    <select id="tipoGrafico">
+                        <option value="faenas">Por Faena</option>
+                        <option value="estados">Por Estado</option>
+                        <option value="creadores">Por Creador</option>
+                        <option value="empresas">Por Empresa</option>
+                        <option value="mensual">Por Mes</option>
+                    </select>
+                    <select id="tipoChart">
+                        <option value="bar">Barras</option>
+                        <option value="pie">Pastel</option>
+                        <option value="line">Línea</option>
+                        <option value="doughnut">Dona</option>
+                    </select>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container-large">
+                        <canvas id="chartPrincipal"></canvas>
+                    </div>
+                    <div class="chart-container-large">
+                        <canvas id="chartSecundario"></canvas>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <h3>Análisis Cruzado</h3>
+                    <div id="analyticsContent"></div>
+                </div>
+            </section>
+
+            <!-- Reportes View -->
+            <section id="reportes-view" class="view">
+                <div class="reportes-grid">
+                    <div class="reporte-card">
+                        <h3>Resumen por Faena</h3>
+                        <div id="reporteFaenas"></div>
+                    </div>
+                    <div class="reporte-card">
+                        <h3>Resumen por Creador</h3>
+                        <div id="reporteCreadores"></div>
+                    </div>
+                    <div class="reporte-card">
+                        <h3>Resumen Mensual</h3>
+                        <div id="reporteMensual"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Administración View -->
+            <section id="administracion-view" class="view">
+                <div class="admin-grid">
+                    <!-- Creadores -->
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h3>👤 Creadores</h3>
+                            <button class="btn btn-primary btn-small" id="btnAgregarCreador">➕ Agregar</button>
+                        </div>
+                        <div class="admin-list" id="listaCreadores"></div>
+                    </div>
+
+                    <!-- Servicios -->
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h3>🏢 Empresas/Servicios</h3>
+                            <button class="btn btn-primary btn-small" id="btnAgregarEmpresa">➕ Agregar</button>
+                        </div>
+                        <div class="admin-list" id="listaEmpresas"></div>
+                    </div>
+
+                    <!-- Faenas -->
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <h3>🏭 Faenas</h3>
+                            <button class="btn btn-primary btn-small" id="btnAgregarFaena">➕ Agregar</button>
+                        </div>
+                        <div class="admin-list" id="listaFaenas"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para Agregar/Editar Servicio -->
+    <div id="modalServicio" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nuevo Servicio</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="formServicio">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Empresa/Servicio</label>
+                        <select id="inputServicio" required>
+                            <option value="">Seleccionar empresa...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Creador</label>
+                        <select id="inputCreador" required>
+                            <option value="">Seleccionar creador...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="inputFecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="inputEstado" required>
+                            <option value="COMPLETADO">COMPLETADO</option>
+                            <option value="PENDIENTE">PENDIENTE</option>
+                            <option value="EN PROCESO">EN PROCESO</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Detalle</label>
+                        <textarea id="inputDetalle" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Factura</label>
+                        <input type="text" id="inputFactura">
+                    </div>
+                    <div class="form-group">
+                        <label>Monto</label>
+                        <input type="number" id="inputMonto" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Archivo (Imagen/PDF)</label>
+                        <input type="file" id="inputArchivo" accept="image/*,.pdf">
+                        <div id="archivoPreview" style="margin-top: 10px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Faena</label>
+                        <select id="inputFaena" required>
+                            <option value="">Seleccionar faena...</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Observaciones</label>
+                        <textarea id="inputObservaciones" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="btnCancelar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
 </body>
 </html>
